@@ -232,7 +232,7 @@ def replace_win_devices(name):
         lname = name.lower()
         for dev in _DEVICES:
             if lname == dev or lname.startswith(dev + '.'):
-                name = '_' + name
+                name = '!' + name
                 break
     return name
 
@@ -261,6 +261,9 @@ def sanitize_filename(name):
         elif sabnzbd.DARWIN:
             # Compensate for the foolish way par2 on OSX handles a colon character
             name = name[name.rfind(':') + 1:]
+
+    if sabnzbd.WIN32:
+        name = replace_win_devices(name)
 
     lst = []
     for ch in name.strip():
