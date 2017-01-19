@@ -312,14 +312,13 @@ def check_encrypted_and_unwanted_files(nzo, filepath):
     if (cfg.unwanted_extensions() and cfg.action_on_unwanted_extensions()) or (nzo.encrypted == 0 and cfg.pause_on_pwrar()):
         # These checks should not break the assembler
         try:
+            # RarFile requires de-unicoded filenames for zf.testrar() but not for is_rarfile
+            filepath_rar = deunicode(clip_path(filepath))
+
             # Is it even a rarfile?
             if rarfile.is_rarfile(filepath):
                 # Safe-format for Windows
-                # RarFile requires de-unicoded filenames for zf.testrar() but not for is_rarfile
-                filepath_split = os.path.split(filepath)
-                workdir_short = short_path(filepath_split[0])
-                filepath = deunicode(os.path.join(workdir_short, filepath_split[1]))
-                zf = rarfile.RarFile(filepath, all_names=True)
+                zf = rarfile.RarFile(filepath_rar, all_names=True)
 
                 # Check for encryption
                 if nzo.encrypted == 0 and cfg.pause_on_pwrar() and (zf.needs_password() or is_cloaked(filepath, zf.namelist())):
@@ -381,7 +380,7 @@ def check_encrypted_and_unwanted_files(nzo, filepath):
                 zf.close()
                 del zf
         except:
-            logging.info('Error during inspection of RAR-file %s', filepath, exc_info=True)
+            logging.warning('Error during inspection of RAR-file %s', filepath_rar, exc_info=True)
 
     return encrypted, unwanted
 
