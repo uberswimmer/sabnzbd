@@ -33,7 +33,7 @@ from sabnzbd.encoding import TRANS, UNTRANS, unicode2local, \
     reliable_unpack_names, unicoder, platform_encode, deunicode
 import sabnzbd.utils.rarfile as rarfile
 from sabnzbd.misc import format_time_string, find_on_path, make_script_path, int_conv, \
-    flag_file, real_path, globber, globber_full, get_all_passwords
+    flag_file, real_path, globber, globber_full, get_all_passwords, clip_path
 from sabnzbd.tvsort import SeriesSorter
 import sabnzbd.cfg as cfg
 from sabnzbd.constants import Status, QCHECK_FILE, RENAMES_FILE
@@ -559,7 +559,7 @@ def rar_extract_core(rarfile_path, numrars, one_folder, nzo, setname, extraction
     if sabnzbd.WIN32:
         # Use all flags
         command = ['%s' % RAR_COMMAND, action, '-idp', overwrite, rename, '-ai', password,
-                   '%s' % rarfile_path, '%s/' % extraction_path]
+                   '%s' % clip_path(rarfile_path), '%s/' % extraction_path.replace('\\\\?\\', '\\\\.\\', 1)]
     elif RAR_PROBLEM:
         # Use only oldest options (specifically no "-or")
         command = ['%s' % RAR_COMMAND, action, '-idp', overwrite, password,
@@ -1200,6 +1200,8 @@ def PAR_Verify(parfile, parfile_nzf, nzo, setname, joinables, classic=False, sin
         command.extend(flist)
 
     stup, need_shell, command, creationflags = build_command(command)
+    # par2 wants to see \\.\ paths
+    command = [x.replace('\\\\?\\', '\\\\.\\', 1) if x.startswith('\\\\?\\') else x for x in command]
     logging.debug('Starting par2: %s', command)
 
     lines = []
@@ -1592,6 +1594,7 @@ def build_command(command):
         # scripts with spaces in the path don't work.
         if need_shell and ' ' in command[0]:
             command[0] = win32api.GetShortPathName(command[0])
+
         if need_shell:
             command = list2cmdline(command)
 

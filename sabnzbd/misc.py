@@ -225,7 +225,7 @@ _DEVICES = ('con', 'prn', 'aux', 'nul',
 
 def replace_win_devices(name):
     ''' Remove reserved Windows device names from a name.
-        aux.txt ==> _aux.txt
+        aux.txt ==> !aux.txt
         txt.aux ==> txt.aux
     '''
     if name:
@@ -245,7 +245,7 @@ else:
     CH_LEGAL = r'+'
 
 
-def sanitize_filename(name):
+def sanitize_filename(name, allow_win_devices=False):
     """ Return filename with illegal chars converted to legal ones
         and with the par2 extension always in lowercase
     """
@@ -262,7 +262,7 @@ def sanitize_filename(name):
             # Compensate for the foolish way par2 on OSX handles a colon character
             name = name[name.rfind(':') + 1:]
 
-    if sabnzbd.WIN32:
+    if sabnzbd.WIN32 and not allow_win_devices:
         name = replace_win_devices(name)
 
     lst = []
@@ -338,11 +338,11 @@ def sanitize_and_trim_path(path):
     path = path.strip()
     new_path = ''
     if sabnzbd.WIN32:
-        if path.startswith(u'\\\\.\\UNC\\'):
-            new_path = u'\\\\.\\UNC\\'
+        if path.startswith(u'\\\\?\\UNC\\'):
+            new_path = u'\\\\?\\UNC\\'
             path = path[8:]
-        elif path.startswith(u'\\\\.\\'):
-            new_path = u'\\\\.\\'
+        elif path.startswith(u'\\\\?\\'):
+            new_path = u'\\\\?\\'
             path = path[4:]
 
     path = path.replace('\\', '/')
@@ -357,6 +357,24 @@ def sanitize_and_trim_path(path):
     for part in parts:
         new_path = os.path.join(new_path, sanitize_foldername(part))
     return os.path.abspath(os.path.normpath(new_path))
+
+
+def sanitize_files_in_folder(folder):
+    """ Sanitize each file in the folder, return list of new names
+    """
+    lst = []
+    for root, _, files in os.walk(folder):
+        for file_ in files:
+            path = os.path.join(root, file_)
+            new_path = os.path.join(root, sanitize_filename(file_))
+            if path != new_path:
+                try:
+                    os.rename(path, new_path)
+                    path = new_path
+                except:
+                    logging.debug('Cannot rename %s to %s', path, new_path)
+            lst.append(path)
+    return lst
 
 
 def flag_file(path, flag, create=False):
@@ -1439,21 +1457,26 @@ def set_permissions(path, recursive=True):
 
 
 def clip_path(path):
-    r""" Remove \\.\ or \\.\UNC\ prefix from Windows path """
+    r""" Remove \\?\ or \\?\UNC\ prefix from Windows path """
     if sabnzbd.WIN32 and path and '?' in path:
-        path = path.replace(u'\\\\.\\UNC\\', u'\\\\', 1).replace(u'\\\\.\\', u'', 1)
+        path = path.replace(u'\\\\?\\UNC\\', u'\\\\', 1).replace(u'\\\\?\\', u'', 1)
     return path
+
+
+def clip_paths(cmds):
+    r""" Remove \\.\ or \\.\UNC\ prefix from Windows path, if needed """
+    return [clip_path(x) for x in cmds]
 
 
 def long_path(path):
     """ For Windows, convert to long style path; others, return same path """
-    if sabnzbd.WIN32 and path and not path.startswith(u'\\\\.\\'):
+    if sabnzbd.WIN32 and path and not path.startswith(u'\\\\?\\'):
         if path.startswith('\\\\'):
             # Special form for UNC paths
-            path = path.replace(u'\\\\', u'\\\\.\\UNC\\', 1)
+            path = path.replace(u'\\\\', u'\\\\?\\UNC\\', 1)
         else:
             # Normal form for local paths
-            path = u'\\\\.\\' + path
+            path = u'\\\\?\\' + path
     return path
 
 

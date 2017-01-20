@@ -382,7 +382,7 @@ class HistoryDB(object):
         if self.execute('SELECT path FROM history WHERE nzo_id=?', t):
             try:
                 # Also legacy fix for long-paths
-                path = self.c.fetchone().get('path','').replace('\\\\?\\', '\\\\.\\', 1)
+                path = self.c.fetchone().get('path','')
             except AttributeError:
                 pass
         return path

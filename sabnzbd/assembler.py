@@ -76,7 +76,7 @@ class Assembler(Thread):
 
             if nzf:
                 sabnzbd.CheckFreeSpace()
-                filename = sanitize_filename(nzf.filename)
+                filename = sanitize_filename(nzf.filename, allow_win_devices=True)
                 nzf.filename = filename
 
                 dupe = nzo.check_for_dupe(nzf)
@@ -315,9 +315,9 @@ def check_encrypted_and_unwanted_files(nzo, filepath):
     if cfg.unwanted_extensions() or (nzo.encrypted == 0 and cfg.pause_on_pwrar()):
         # Safe-format for Windows
         # RarFile requires de-unicoded filenames for zf.testrar()
-        filepath_split = os.path.split(filepath)
-        workdir_short = filepath_split[0]
-        filepath = deunicode(os.path.join(workdir_short, filepath_split[1]))
+        workdir_short, filename = os.path.split(filepath)
+        filepath = deunicode(os.path.join(workdir_short, filename))
+        safe_name = filename == sanitize_filename(filename)
 
         # Is it even a rarfile?
         if rarfile.is_rarfile(filepath):
@@ -334,7 +334,7 @@ def check_encrypted_and_unwanted_files(nzo, filepath):
                         nzo.encrypted = 1
                         encrypted = True
 
-                    elif sabnzbd.HAVE_CRYPTOGRAPHY:
+                    elif sabnzbd.HAVE_CRYPTOGRAPHY and safe_name:
                         # Lets test if any of the password work
                         password_hit = False
                         rarfile.UNRAR_TOOL = sabnzbd.newsunpack.RAR_COMMAND
