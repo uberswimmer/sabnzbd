@@ -338,11 +338,11 @@ def sanitize_and_trim_path(path):
     path = path.strip()
     new_path = ''
     if sabnzbd.WIN32:
-        if path.startswith(u'\\\\?\\UNC\\'):
-            new_path = u'\\\\?\\UNC\\'
+        if path.startswith(u'\\\\.\\UNC\\'):
+            new_path = u'\\\\.\\UNC\\'
             path = path[8:]
-        elif path.startswith(u'\\\\?\\'):
-            new_path = u'\\\\?\\'
+        elif path.startswith(u'\\\\.\\'):
+            new_path = u'\\\\.\\'
             path = path[4:]
 
     path = path.replace('\\', '/')
@@ -1460,21 +1460,21 @@ def short_path(path, always=True):
 
 
 def clip_path(path):
-    r""" Remove \\?\ or \\?\UNC\ prefix from Windows path """
+    r""" Remove \\.\ or \\.\UNC\ prefix from Windows path """
     if sabnzbd.WIN32 and path and '?' in path:
-        path = path.replace(u'\\\\?\\UNC\\', u'\\\\').replace(u'\\\\?\\', u'')
+        path = path.replace(u'\\\\.\\UNC\\', u'\\\\').replace(u'\\\\.\\', u'')
     return path
 
 
 def long_path(path):
     """ For Windows, convert to long style path; others, return same path """
-    if sabnzbd.WIN32 and path and not path.startswith(u'\\\\?\\'):
+    if sabnzbd.WIN32 and path and not path.startswith(u'\\\\.\\'):
         if path.startswith('\\\\'):
             # Special form for UNC paths
-            path = path.replace(u'\\\\', u'\\\\?\\UNC\\', 1)
+            path = path.replace(u'\\\\', u'\\\\.\\UNC\\', 1)
         else:
             # Normal form for local paths
-            path = u'\\\\?\\' + path
+            path = u'\\\\.\\' + path
     return path
 
 
