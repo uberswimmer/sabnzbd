@@ -31,7 +31,7 @@ from sabnzbd.newsunpack import unpack_magic, par2_repair, external_processing, \
     sfv_check, build_filelists, rar_sort
 from threading import Thread
 from sabnzbd.misc import real_path, get_unique_path, create_dirs, move_to_path, \
-    make_script_path, short_path, long_path, clip_path, \
+    make_script_path, long_path, clip_path, \
     on_cleanup_list, renamer, remove_dir, remove_all, globber, globber_full, \
     set_permissions, cleanup_empty_directories, check_win_maxpath, fix_unix_encoding, \
     sanitize_and_trim_path
@@ -468,7 +468,7 @@ def process_job(nzo):
                 nzo.status = Status.RUNNING
                 nzo.set_action_line(T('Running script'), unicoder(script))
                 nzo.set_unpack_info('Script', T('Running user script %s') % unicoder(script), unique=True)
-                script_log, script_ret = external_processing(short_path(script_path, False), short_path(workdir_complete, False), nzo.filename,
+                script_log, script_ret = external_processing(script_path, workdir_complete, nzo.filename,
                                                              dirname, cat, nzo.group, job_result,
                                                              nzo.nzo_info.get('failure', ''))
                 script_line = get_last_line(script_log)
@@ -755,7 +755,7 @@ def try_rar_check(nzo, workdir, setname):
         When setname is '', all RAR files will be used, otherwise only the matching one
         If no RAR's are found, returns True
     """
-    _, _, rars, _, _ = build_filelists(short_path(workdir), None)
+    _, _, rars, _, _ = build_filelists(workdir, None)
 
     if setname:
         # Filter based on set

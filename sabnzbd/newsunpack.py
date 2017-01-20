@@ -33,7 +33,7 @@ from sabnzbd.encoding import TRANS, UNTRANS, unicode2local, \
     reliable_unpack_names, unicoder, platform_encode, deunicode
 import sabnzbd.utils.rarfile as rarfile
 from sabnzbd.misc import format_time_string, find_on_path, make_script_path, int_conv, \
-    flag_file, real_path, globber, globber_full, short_path, get_all_passwords
+    flag_file, real_path, globber, globber_full, get_all_passwords
 from sabnzbd.tvsort import SeriesSorter
 import sabnzbd.cfg as cfg
 from sabnzbd.constants import Status, QCHECK_FILE, RENAMES_FILE
@@ -445,8 +445,7 @@ def rar_unpack(nzo, workdir, workdir_complete, delete, one_folder, rars):
         if workdir_complete and rarpath.startswith(workdir):
             extraction_path = workdir_complete
         else:
-            # Make sure that path is not too long
-            extraction_path = short_path(os.path.split(rarpath)[0])
+            extraction_path = os.path.split(rarpath)[0]
 
         logging.info("Extracting rarfile %s (belonging to %s) to %s",
                      rarpath, rar_set, extraction_path)
@@ -1002,7 +1001,6 @@ def par2_repair(parfile_nzf, nzo, workdir, setname, single):
                 break
 
     # Shorten just the workdir on Windows
-    # workdir = short_path(workdir)
     parfile = os.path.join(workdir, parfile_nzf.filename)
 
     old_dir_content = os.listdir(workdir)

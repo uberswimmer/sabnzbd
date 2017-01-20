@@ -605,27 +605,24 @@ def backup_nzb(filename, data):
 
 @synchronized(NZB_LOCK)
 def save_compressed(folder, filename, data):
-    """ Save compressed NZB file in folder """
-    # Need to go to the save folder to
-    # prevent the pathname being embedded in the GZ file
-    here = os.getcwd()
-    os.chdir(misc.short_path(folder))
-
+    """ Save compressed NZB file in folder
+    """
     if filename.endswith('.nzb'):
         filename += '.gz'
     else:
         filename += '.nzb.gz'
-    logging.info("Backing up %s", os.path.join(folder, filename))
+    filepath = os.path.join(folder, filename)
+    logging.info("Backing up %s", filepath)
     try:
-        f = gzip.GzipFile(filename, 'wb')
+        fp = open(filepath, 'w')
+        f = gzip.GzipFile(filename, 'wb', fileobj=fp)
         f.write(data)
         f.flush()
         f.close()
+        fp.close()
     except:
-        logging.error(T('Saving %s failed'), os.path.join(folder, filename))
+        logging.error(T('Saving %s failed'), filepath)
         logging.info("Traceback: ", exc_info=True)
-
-    os.chdir(here)
 
 
 ##############################################################################

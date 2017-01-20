@@ -35,7 +35,7 @@ except:
 
 import sabnzbd
 from sabnzbd.misc import get_filepath, sanitize_filename, get_unique_filename, renamer, \
-    set_permissions, flag_file, long_path, clip_path, get_all_passwords, short_path
+    set_permissions, flag_file, long_path, clip_path, get_all_passwords
 from sabnzbd.constants import QCHECK_FILE, Status
 import sabnzbd.cfg as cfg
 from sabnzbd.articlecache import ArticleCache

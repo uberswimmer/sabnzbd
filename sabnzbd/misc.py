@@ -1438,31 +1438,10 @@ def set_permissions(path, recursive=True):
             set_chmod(path, umask_file, report)
 
 
-def short_path(path, always=True):
-    """ For Windows, return shortened ASCII path, for others same path
-        When `always` is off, only return a short path when size is above 259
-    """
-    if sabnzbd.WIN32:
-        import win32api
-        path = os.path.normpath(path)
-        if always or len(path) > 259:
-            # First make the path "long"
-            path = long_path(path)
-            if os.path.exists(path):
-                # Existing path can always be shortened
-                path = win32api.GetShortPathName(path)
-            else:
-                # For new path, shorten only existing part (recursive)
-                path1, name = os.path.split(path)
-                path = os.path.join(short_path(path1, always), name)
-        path = clip_path(path)
-    return path
-
-
 def clip_path(path):
     r""" Remove \\.\ or \\.\UNC\ prefix from Windows path """
     if sabnzbd.WIN32 and path and '?' in path:
-        path = path.replace(u'\\\\.\\UNC\\', u'\\\\').replace(u'\\\\.\\', u'')
+        path = path.replace(u'\\\\.\\UNC\\', u'\\\\', 1).replace(u'\\\\.\\', u'', 1)
     return path
 
 
