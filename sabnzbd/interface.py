@@ -1267,14 +1267,9 @@ class ConfigPage(object):
         conf['have_cryptography'] = sabnzbd.HAVE_CRYPTOGRAPHY
         conf['have_yenc'] = HAVE_YENC
 
-        if sabnzbd.HAVE_SSL:
-            conf['have_ssl'] = 1
-            conf['have_ssl_context'] = sabnzbd.HAVE_SSL_CONTEXT
-            conf['ssl_version'] = ssl_version()
-            conf['ssl_protocols'] = ', '.join(ssl_protocols_labels())
-        else:
-            conf['have_ssl'] = 0
-            conf['have_ssl_context'] = 0
+        conf['have_ssl_context'] = sabnzbd.HAVE_SSL_CONTEXT
+        conf['ssl_version'] = ssl_version()
+        conf['ssl_protocols'] = ', '.join(ssl_protocols_labels())
 
         new = {}
         for svr in config.get_servers():
@@ -1449,7 +1444,6 @@ class ConfigSwitches(object):
 
         conf = build_header(self.__prim, self.__web_dir)
 
-        conf['have_ssl'] = sabnzbd.HAVE_SSL
         conf['have_ssl_context'] = sabnzbd.HAVE_SSL_CONTEXT
         conf['have_multicore'] = sabnzbd.WIN32 or sabnzbd.DARWIN_INTEL
         conf['have_nice'] = bool(sabnzbd.newsunpack.NICE_COMMAND)
@@ -1607,7 +1601,6 @@ class ConfigGeneral(object):
         # Temporary fix, problem with build_header
         conf['restart_req'] = sabnzbd.RESTART_REQ
 
-        conf['have_ssl'] = sabnzbd.HAVE_SSL
         conf['have_ssl_context'] = sabnzbd.HAVE_SSL_CONTEXT
         conf['have_cryptography'] = sabnzbd.HAVE_CRYPTOGRAPHY
 
@@ -1787,7 +1780,6 @@ class ConfigServer(object):
                 new[-1]['amounts'] = to_units(t), to_units(m), to_units(w), to_units(d)
         conf['servers'] = new
         conf['cats'] = list_cats(default=True)
-        conf['have_ssl'] = sabnzbd.HAVE_SSL
         conf['have_ssl_context'] = sabnzbd.HAVE_SSL_CONTEXT
 
         template = Template(file=os.path.join(self.__web_dir, 'config_server.tmpl'),
