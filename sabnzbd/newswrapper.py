@@ -466,7 +466,7 @@ class NewsWrapper(object):
                     new_lines[i] = new_lines[i][1:]
             self.lines.extend(new_lines)
 
-            # For status purposes
+            # For status-code purposes
             if not self.data:
                 self.data.append(chunk)
 
